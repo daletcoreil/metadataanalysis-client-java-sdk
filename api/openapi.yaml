@@ -1,0 +1,833 @@
+openapi: 3.0.2
+info:
+  contact:
+    email: cortexsupport@dalet.com
+    name: Dalet
+    url: https://www.dalet.com
+  termsOfService: https://www.dalet.com
+  title: Dalet Metadata Analysis API
+  version: 2.1.0
+servers:
+- url: https://svi6ps1cih.execute-api.us-east-1.amazonaws.com/preprod
+paths:
+  /metadata-analysis/analyze:
+    post:
+      description: Perform metadata analysis on the provided text.
+      operationId: analyze
+      parameters:
+      - description: Project service id of the client associated to the request
+        explode: false
+        in: header
+        name: ProjectServiceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+        description: Text to be analyzed and list of requested analysis methods.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzedTextResponse'
+          description: Success response
+        "400":
+          description: Bad request
+        "401":
+          description: Authorization request fail
+        "502":
+          description: Failed request.  Reason is most likely quota violation.
+      security:
+      - tokenSignature: []
+      tags:
+      - metadataAnalysis
+      x-contentType: application/json
+      x-accepts: application/json
+  /metadata-analysis/knowledge-graph-search:
+    get:
+      description: Get information for given knowledge graph ids. Knowledge graph
+        ids are returned by the entities extractor of the analyzed method. This returns
+        detailed information on an entity including image and description.
+      operationId: knowledgeGraphSearch
+      parameters:
+      - description: Project service id of the client associated to the request
+        explode: false
+        in: header
+        name: ProjectServiceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Query knowledge graph ids
+        explode: true
+        in: query
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeGraphSearchResponse'
+          description: Success response
+        "400":
+          description: Bad request
+        "401":
+          description: Authorization request fail
+        "502":
+          description: Failed request.  Reason is most likely quota violation.
+      security:
+      - tokenSignature: []
+      tags:
+      - metadataAnalysis
+      x-accepts: application/json
+  /metadata-analysis/translate-text:
+    post:
+      description: Translate a given text to a target language.
+      operationId: translateText
+      parameters:
+      - description: Project service id of the client associated to the request
+        explode: false
+        in: header
+        name: ProjectServiceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateTextRequest'
+        description: Request which contains the needed information for the translate
+          operation.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslateTextResponse'
+          description: Success response
+        "400":
+          description: Bad request
+        "401":
+          description: Authorization request fail
+        "502":
+          description: Failed request.  Reason is most likely quota violation.
+      security:
+      - tokenSignature: []
+      tags:
+      - metadataAnalysis
+      x-contentType: application/json
+      x-accepts: application/json
+  /metadata-analysis/segment-text:
+    post:
+      description: Create segments from a given text.
+      operationId: segmentText
+      parameters:
+      - description: Project service id of the client associated to the request
+        explode: false
+        in: header
+        name: ProjectServiceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SegmentTextRequest'
+        description: Request which contains the needed information for the segment
+          operation.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SegmentTextResponse'
+          description: Success response
+        "400":
+          description: Bad request
+        "401":
+          description: Authorization request fail
+        "502":
+          description: Failed request.  Reason is most likely quota violation.
+      security:
+      - tokenSignature: []
+      tags:
+      - metadataAnalysis
+      x-contentType: application/json
+      x-accepts: application/json
+  /metadata-analysis/translate-captions:
+    post:
+      description: Translate captions from a given text.
+      operationId: TranslateCaptions
+      parameters:
+      - description: Project service id of the client associated to the request
+        explode: false
+        in: header
+        name: ProjectServiceId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateCaptionsRequest'
+        description: Request which contains the needed information for the traslate
+          captions operation.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslateCaptionsResponse'
+          description: Success response
+        "400":
+          description: Bad request
+        "401":
+          description: Authorization request fail
+        "502":
+          description: Failed request.  Reason is most likely quota violation.
+      security:
+      - tokenSignature: []
+      tags:
+      - metadataAnalysis
+      x-contentType: application/json
+      x-accepts: application/json
+  /auth/access-token:
+    post:
+      description: Generate new access token
+      operationId: getAccessToken
+      parameters:
+      - description: client_id of the application
+        explode: false
+        in: header
+        name: client
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: secret_key of the application
+        explode: false
+        in: header
+        name: secret
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                $ref: '#/components/examples/GetTokenResponse/value'
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: Success response
+        "401":
+          description: Invalid secret or client
+      tags:
+      - auth
+      x-accepts: application/json
+components:
+  schemas:
+    AnalyzeRequest:
+      description: Text to be analyzed and requested analysis methods. if not specified
+        all analyses are executed.
+      example:
+        extractors:
+        - entities
+        - entities
+        classifierScoreThreshold: 6.027456183070403
+        extractorsScoreThreshold: 0.8008281904610115
+        classifiers:
+        - IPTCNewsCodes
+        - IPTCNewsCodes
+        text: text
+      properties:
+        text:
+          description: 'Up to 200kb of UTF-8 encoded raw text to be analyzed. The
+            language is detected automatically and it should be one of the following:
+            English (en), French (fr), German (de), Italian (it), Japanese (ja), Korean
+            (ko), Portuguese (pt), Russian (ru), Spanish (es)'
+          type: string
+        extractors:
+          description: Extractors detect spans in the text and return their normalized
+            description.
+          items:
+            enum:
+            - entities
+            - topics
+            type: string
+          type: array
+        extractorsScoreThreshold:
+          description: Only return extractors results with score above the threshold
+            between 0 and 1. if not specified return all results.
+          type: number
+        classifiers:
+          description: Classifiers categorize the whole text according to industry
+            standard taxonomies.
+          items:
+            enum:
+            - IPTCNewsCodes
+            - IPTCMediaTopics
+            - IABTaxonomy
+            type: string
+          type: array
+        classifierScoreThreshold:
+          description: Only return categories with score above the threshold between
+            0 and 1. if not specified return all detected categories.
+          type: number
+      required:
+      - text
+      title: AnalyzeRequest
+      type: object
+    Span:
+      example:
+        content: content
+        beginOffset: 6.027456183070403
+      properties:
+        content:
+          type: string
+        beginOffset:
+          description: The API calculates the beginning offset of the content in the
+            original document as a number of characters starting from zero index position.
+          type: number
+      type: object
+    Mention:
+      example:
+        text:
+          content: content
+          beginOffset: 6.027456183070403
+        type: TYPEUNKNOWN
+      properties:
+        text:
+          $ref: '#/components/schemas/Span'
+        type:
+          enum:
+          - TYPEUNKNOWN
+          - PROPER
+          - COMMON
+          type: string
+      type: object
+    Entity:
+      example:
+        salience: 0.8008281904610115
+        mentions:
+        - text:
+            content: content
+            beginOffset: 6.027456183070403
+          type: TYPEUNKNOWN
+        - text:
+            content: content
+            beginOffset: 6.027456183070403
+          type: TYPEUNKNOWN
+        name: name
+        mid: mid
+        type: UNKNOWN
+        wikipediaUrl: wikipediaUrl
+      properties:
+        name:
+          type: string
+        type:
+          enum:
+          - UNKNOWN
+          - PERSON
+          - LOCATION
+          - ORGANIZATION
+          - EVENT
+          - WORKOFART
+          - CONSUMERGOOD
+          - OTHER
+          - PHONENUMBER
+          - ADDRESS
+          - DATE
+          - NUMBER
+          - PRICE
+          type: string
+        mid:
+          description: Google knowledge graph id when detected.
+          type: string
+        wikipediaUrl:
+          type: string
+        salience:
+          description: The salience score associated with the entity in the [0, 1.0]
+            range. The salience score for an entity provides information about the
+            importance or centrality of that entity to the entire document text. Scores
+            closer to 0 are less salient, while scores closer to 1.0 are highly salient.
+          type: number
+        mentions:
+          items:
+            $ref: '#/components/schemas/Mention'
+          type: array
+      type: object
+    Topic:
+      example:
+        score: 1.4658129805029452
+        wikiLink: wikiLink
+        wikidataId: wikidataId
+        id: id
+        label: label
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        wikiLink:
+          description: Link to Wikipedia for this topic, or None if this topic couldn't
+            be linked to a Wikipedia page.
+          type: string
+        score:
+          description: The relevance of this topic to the processed document. This
+            score ranges from 0 to 1, with 1 representing the highest relevance of
+            the topic to the processed document.
+          type: number
+        wikidataId:
+          description: The disambiguated Wikidata QID for this topic, or None if either
+            this topic could not be disambiguated, or a Wikidata link doesn’t exist.
+          type: string
+      type: object
+    ClassifierCategory:
+      example:
+        score: 5.962133916683182
+        classifierId: IPTCNewsCodes
+        id: id
+        label: label
+        categoryId: categoryId
+      properties:
+        id:
+          type: string
+        classifierId:
+          enum:
+          - IPTCNewsCodes
+          - IPTCMediaTopics
+          - IABTaxonomy
+          type: string
+        categoryId:
+          type: string
+        label:
+          type: string
+        score:
+          type: number
+      type: object
+    AnalyzedTextResponse:
+      example:
+        languageIsReliable: true
+        entities:
+        - salience: 0.8008281904610115
+          mentions:
+          - text:
+              content: content
+              beginOffset: 6.027456183070403
+            type: TYPEUNKNOWN
+          - text:
+              content: content
+              beginOffset: 6.027456183070403
+            type: TYPEUNKNOWN
+          name: name
+          mid: mid
+          type: UNKNOWN
+          wikipediaUrl: wikipediaUrl
+        - salience: 0.8008281904610115
+          mentions:
+          - text:
+              content: content
+              beginOffset: 6.027456183070403
+            type: TYPEUNKNOWN
+          - text:
+              content: content
+              beginOffset: 6.027456183070403
+            type: TYPEUNKNOWN
+          name: name
+          mid: mid
+          type: UNKNOWN
+          wikipediaUrl: wikipediaUrl
+        topics:
+        - score: 1.4658129805029452
+          wikiLink: wikiLink
+          wikidataId: wikidataId
+          id: id
+          label: label
+        - score: 1.4658129805029452
+          wikiLink: wikiLink
+          wikidataId: wikidataId
+          id: id
+          label: label
+        language: language
+        categories:
+        - score: 5.962133916683182
+          classifierId: IPTCNewsCodes
+          id: id
+          label: label
+          categoryId: categoryId
+        - score: 5.962133916683182
+          classifierId: IPTCNewsCodes
+          id: id
+          label: label
+          categoryId: categoryId
+      properties:
+        language:
+          type: string
+        languageIsReliable:
+          type: boolean
+        entities:
+          items:
+            $ref: '#/components/schemas/Entity'
+          type: array
+        topics:
+          description: List of topics detected in the text. each detected topic refers
+            to wikiLink and wikidataId or None if no wikipedia reference is found.
+          items:
+            $ref: '#/components/schemas/Topic'
+          type: array
+        categories:
+          description: List of categories associated to the text. IPTC news codes
+            refer to - http://cv.iptc.org/newscodes/subjectcode IPTC media topics
+            refer to - http://cv.iptc.org/newscodes/mediatopic IAB taxonomy refer
+            to - https://www.iab.com/guidelines/taxonomy
+          items:
+            $ref: '#/components/schemas/ClassifierCategory'
+          type: array
+      required:
+      - language
+      title: AnalyzedTextResponse
+      type: object
+    KnowledgeGraph:
+      example:
+        image:
+          contentUrl: contentUrl
+          url: url
+        types:
+        - types
+        - types
+        detailedDescription:
+          license: license
+          articleBody: articleBody
+          url: url
+        name: name
+        mid: mid
+        description: description
+        url: url
+      properties:
+        mid:
+          description: Google knowledge graph id.
+          type: string
+        name:
+          type: string
+        types:
+          items:
+            type: string
+          type: array
+        description:
+          type: string
+        detailedDescription:
+          $ref: '#/components/schemas/KnowledgeGraph_detailedDescription'
+        image:
+          $ref: '#/components/schemas/KnowledgeGraph_image'
+        url:
+          description: The official website URL of the entity, if available.
+          type: string
+      type: object
+    KnowledgeGraphSearchResponse:
+      example:
+        items:
+        - result:
+            image:
+              contentUrl: contentUrl
+              url: url
+            types:
+            - types
+            - types
+            detailedDescription:
+              license: license
+              articleBody: articleBody
+              url: url
+            name: name
+            mid: mid
+            description: description
+            url: url
+          resultScore: 0.8008281904610115
+        - result:
+            image:
+              contentUrl: contentUrl
+              url: url
+            types:
+            - types
+            - types
+            detailedDescription:
+              license: license
+              articleBody: articleBody
+              url: url
+            name: name
+            mid: mid
+            description: description
+            url: url
+          resultScore: 0.8008281904610115
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/KnowledgeGraphSearchResponse_items'
+          type: array
+      required:
+      - items
+      title: KnowledgeGraphSearchResponse
+      type: object
+    TranslateTextRequest:
+      description: Contains information about the request.
+      example:
+        targetLanguage: targetLanguage
+        resource:
+          key: '{}'
+        text: text
+        sourceLanguage: sourceLanguage
+      properties:
+        resource:
+          additionalProperties: true
+          description: Use this field to associate metadata for the translate request.
+          type: object
+        text:
+          type: string
+        sourceLanguage:
+          type: string
+        targetLanguage:
+          type: string
+      required:
+      - targetLanguage
+      - text
+      title: TranslateTextRequest
+      type: object
+    TranslateTextResponse:
+      example:
+        detectedSourceLanguage: detectedSourceLanguage
+        text: text
+      properties:
+        detectedSourceLanguage:
+          description: The source language that was detected by the API in case it
+            was not specified in the request.
+          type: string
+        text:
+          description: Translated text.
+          type: string
+      required:
+      - text
+      title: TranslateTextResponse
+      type: object
+    SegmentTextRequest:
+      example:
+        outputLocation:
+          draftjsFile:
+            awsS3Bucket: awsS3Bucket
+            httpEndpoint: httpEndpoint
+            awsS3Key: awsS3Key
+          dpttFile:
+            awsS3Bucket: awsS3Bucket
+            httpEndpoint: httpEndpoint
+            awsS3Key: awsS3Key
+        inputFile:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+        characters: ""
+        lines: ""
+      properties:
+        inputFile:
+          $ref: '#/components/schemas/Locator'
+        outputLocation:
+          $ref: '#/components/schemas/SegmentTextResponse'
+        lines:
+          type: int
+        characters:
+          type: int
+      required:
+      - inputFile
+      - outputLocation
+      title: SegmentTextRequest
+      type: object
+    SegmentTextResponse:
+      example:
+        draftjsFile:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+        dpttFile:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+      properties:
+        dpttFile:
+          $ref: '#/components/schemas/Locator'
+        draftjsFile:
+          $ref: '#/components/schemas/Locator'
+      required:
+      - dpttFile
+      - draftjsFile
+      title: SegmentTextResponse
+      type: object
+    TranslateCaptionsRequest:
+      example:
+        outputLocation:
+          ttmlFile:
+            awsS3Bucket: awsS3Bucket
+            httpEndpoint: httpEndpoint
+            awsS3Key: awsS3Key
+          textFile:
+            awsS3Bucket: awsS3Bucket
+            httpEndpoint: httpEndpoint
+            awsS3Key: awsS3Key
+        skeletonMode: true
+        targetLanguage: targetLanguage
+        sourceSubtitle:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+        sourceLanguage: sourceLanguage
+      properties:
+        sourceSubtitle:
+          $ref: '#/components/schemas/Locator'
+        outputLocation:
+          $ref: '#/components/schemas/TranslateCaptionsResponse'
+        targetLanguage:
+          type: string
+        skeletonMode:
+          default: true
+          type: boolean
+        sourceLanguage:
+          type: string
+      required:
+      - outputLocation
+      - skeletonMode
+      - sourceSubtitle
+      - targetLanguage
+      title: TranslateCaptionsRequest
+      type: object
+    TranslateCaptionsResponse:
+      example:
+        ttmlFile:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+        textFile:
+          awsS3Bucket: awsS3Bucket
+          httpEndpoint: httpEndpoint
+          awsS3Key: awsS3Key
+      properties:
+        ttmlFile:
+          $ref: '#/components/schemas/Locator'
+        textFile:
+          $ref: '#/components/schemas/Locator'
+      required:
+      - ttmlFile
+      title: TranslateCaptionsResponse
+      type: object
+    Locator:
+      description: Generic description of a file location according to the EBU FIMS
+        specification.
+      example:
+        awsS3Bucket: awsS3Bucket
+        httpEndpoint: httpEndpoint
+        awsS3Key: awsS3Key
+      properties:
+        awsS3Bucket:
+          description: Name of an AWS S3 bucket
+          type: string
+        awsS3Key:
+          description: Name of a file in the AWS S3 bucket. For example, name of media
+            file to be indexed in an Input Locator or name of a JSON file in an Output
+            Locator.
+          type: string
+        httpEndpoint:
+          description: Public URL to access the file in the bucket. Must be computed
+            using the AWS SDK method `GeneratePresignedUrl`
+          type: string
+      required:
+      - awsS3Bucket
+      - awsS3Key
+      - httpEndpoint
+      title: Locator
+      type: object
+    Token:
+      description: Access token necessary to submit requests to the API.
+      example:
+        authorization: authorization
+        expires: 0
+      properties:
+        authorization:
+          type: string
+        expires:
+          type: integer
+      required:
+      - authorization
+      - expires
+      title: Token
+      type: object
+    KnowledgeGraph_detailedDescription:
+      description: A detailed description of the entity.
+      example:
+        license: license
+        articleBody: articleBody
+        url: url
+      properties:
+        articleBody:
+          type: string
+        url:
+          type: string
+        license:
+          type: string
+    KnowledgeGraph_image:
+      description: An image to help identify the entity.
+      example:
+        contentUrl: contentUrl
+        url: url
+      properties:
+        url:
+          type: string
+        contentUrl:
+          type: string
+    KnowledgeGraphSearchResponse_items:
+      example:
+        result:
+          image:
+            contentUrl: contentUrl
+            url: url
+          types:
+          - types
+          - types
+          detailedDescription:
+            license: license
+            articleBody: articleBody
+            url: url
+          name: name
+          mid: mid
+          description: description
+          url: url
+        resultScore: 0.8008281904610115
+      properties:
+        resultScore:
+          description: An indicator of how well the entity matched the request constraints.
+          type: number
+        result:
+          $ref: '#/components/schemas/KnowledgeGraph'
+  securitySchemes:
+    tokenSignature:
+      in: header
+      name: Authorization
+      type: apiKey
+
